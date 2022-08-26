@@ -1,0 +1,3 @@
+= list_associated_revisions
+
+GET /list_associated_revisions/changeset_issue.json
