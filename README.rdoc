@@ -1,3 +1,5 @@
 = list_associated_revisions
 
 GET /list_associated_revisions/changeset_issue.json
+GET /list_associated_revisions/changesets.json
+GET /list_associated_revisions/repositories.json
