@@ -4,7 +4,7 @@ end
 class ListRevisionsController < ApplicationController
 	before_action :require_admin
 	before_action :require_admin_or_api_request
-	accept_api_auth :changeset_issue, :repository
+	accept_api_auth :changeset_issue, :repositories, :changesets
 
 	def changeset_issue
 		hash = repositories_hash

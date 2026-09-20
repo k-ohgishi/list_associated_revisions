@@ -1,8 +1,8 @@
 Redmine::Plugin.register :list_associated_revisions do
-  name 'List Associated Revisions plugin'
+  name 'List of associated revisions plugin'
   author 'k-ohgishi'
   description 'This is a plugin for Redmine'
-  version '0.1.0'
+  version '0.1.1'
   url 'https://github.com/k-ohgishi/list_associated_revisions'
   author_url 'https://github.com/k-ohgishi'
 end

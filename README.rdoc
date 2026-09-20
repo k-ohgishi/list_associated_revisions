@@ -1,5 +1,17 @@
 = list_associated_revisions
 
-GET /list_associated_revisions/changeset_issue.json
-GET /list_associated_revisions/changesets.json
-GET /list_associated_revisions/repositories.json
+There is no query available to retrieve issues with associated revisions, nor is it possible to obtain changesets directly from the issue list. Furthermore, there is no API for repository information.
+
+Consequently, to compile a list of associated revisions, one must fetch each issue in the target project along with its changesets. To account for potential errors in associated revisions, it is necessary to retrieve all issues in the system. This plugin therefore provides a list of issues that includes their associated revisions.
+
+  GET /list_associated_revisions/changeset_issue.json
+
+It also enables the retrieval of two additional lists.
+
+Since there is no provided method to determine the maximum repository ID, the only option is trial and error; therefore, the plugin provides a list of repositories that includes their IDs.
+
+  GET /list_associated_revisions/repositories.json
+
+In Git, force pushes can result in dangling commits. The only ways to identify dangling commits present in Redmine are by using hashes or by tracing parent-child relationships. To address this, the plugin provides a list of changesets.
+
+  GET /list_associated_revisions/changesets.json

@@ -1,0 +1,19 @@
+= list_associated_revisions
+
+issueはassociated revisionsありのqueryが存在せず、issueのlistでchangesetsを取得することもできない。
+また、repositoryに関するAPIも存在しない。
+
+このため、associated revisionsのlistを作成するには、changesetsありで対象projectのissue1つ1つを取得する必要がある。間違ったassociated revisionsがあることを想定すると、systemの全issueを取得する必要がある。
+そこでこのpluginにてassociated revisions付きのissueのリストを提供する。
+
+  GET /list_associated_revisions/changeset_issue.json
+
+併せて別の2つのlistも取得できるようにする。
+
+repositoryの最大idを調べる方法が提供されて居らず、試行錯誤で最大idを調べるしかない。このため、idを含んだrepositoryのlistを提供する。
+
+  GET /list_associated_revisions/repositories.json
+
+gitだとforce pushにてdangling commitが発生する。Redmineに存在するdangling commitを確認するにはhashを使用するか、親子関係を辿るしかない。このため、changesetsのlistを提供する。
+
+  GET /list_associated_revisions/changesets.json
