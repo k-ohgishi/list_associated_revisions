@@ -2,6 +2,12 @@ class ChangesetsIssue < ActiveRecord::Base
 end
 class ListRevisionsChangesetsIssue < ChangesetsIssue
   belongs_to :issue
+  belongs_to :changeset
+  has_one :project, through: :issue
+  has_one :repository, through: :changeset
+end
+class ListRevisionsChangeset < Changeset
+  has_one :project, through: :repository
 end
 
 class ListRevisionsController < ApplicationController
@@ -10,32 +16,33 @@ class ListRevisionsController < ApplicationController
 	accept_api_auth :changeset_issue, :repositories, :changesets
 
 	def changeset_issue
-		hash = repositories_hash
+		project_identifier = []
+		Repository.includes(:project).all.each do |x|
+			project_identifier[x.id] = x.project.identifier
+		end
 		output =
-			ListRevisionsChangesetsIssue.all.map() do |x|
-				changeset = Changeset.find(x.changeset_id)
-				repository = hash[changeset.repository_id]
+			ListRevisionsChangesetsIssue.includes(:project, :repository).map() do |x|
 				{
 					:issue => {
 						:id => x.issue_id,
 						:project => x.issue.project.identifier
 					},
 					:repository => {
-						:id => repository[:identifier],
-						:project => repository[:project].identifier
+						:id => x.repository.identifier,
+						:project => project_identifier[x.repository.project_id]
 					},
-					:revision => changeset.revision
-				}.merge(changeset.revision == changeset.scmid ? {} : {:scmid => changeset.scmid})
+					:revision => x.changeset.revision
+				}.merge(x.changeset.revision == x.changeset.scmid ? {} : {:scmid => x.changeset.scmid})
 			end
 		render :json => output
 	end
 
 	def repositories
 		output =
-			Repository.all.sort_by{|x| x.id}.map() do |x|
+			Repository.includes(:project).all.sort_by{|x| x.id}.map() do |x|
 			{
 				:id => x.id,
-				:project => Project.find(x.project_id).identifier,
+				:project => x.project.identifier,
 				:url => x.url,
 				:type => x.type,
 				:identifier => x.identifier
@@ -45,24 +52,14 @@ class ListRevisionsController < ApplicationController
 	end
 
 	def changesets
-		hash = repositories_hash
 		output =
-			Changeset.all.map() do |x|
+			ListRevisionsChangeset.includes(:project).all.map do |x|
 			{
-				:project => hash[x.repository_id][:project].identifier,
-				:repository => hash[x.repository_id][:identifier],
+				:project => x.project.identifier,
+				:repository => x.repository.identifier,
 				:revision => x.revision
 			}.merge(x.revision == x.scmid ? {} : {:scmid => x.scmid})
 			end
 		render :json => output
-	end
-
-	private
-
-	def repositories_hash
-		Repository.all.inject(Hash.new()) do |result, x|
-			result[x.id] = {:project => Project.find(x.project_id), :identifier => x.identifier}
-			result
-		end
 	end
 end
