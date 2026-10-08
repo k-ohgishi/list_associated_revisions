@@ -16,7 +16,7 @@ class ListRevisionsController < ApplicationController
 	accept_api_auth :changeset_issue, :repositories, :changesets
 
 	def changeset_issue
-		project_identifier = []
+		project_identifier = {}
 		Repository.includes(:project).all.each do |x|
 			project_identifier[x.id] = x.project.identifier
 		end
