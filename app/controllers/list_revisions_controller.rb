@@ -1,5 +1,8 @@
 class ChangesetsIssue < ActiveRecord::Base
 end
+class ListRevisionsChangesetsIssue < ChangesetsIssue
+  belongs_to :issue
+end
 
 class ListRevisionsController < ApplicationController
 	before_action :require_admin
@@ -9,16 +12,20 @@ class ListRevisionsController < ApplicationController
 	def changeset_issue
 		hash = repositories_hash
 		output =
-			ChangesetsIssue.all.map() do |x|
+			ListRevisionsChangesetsIssue.all.map() do |x|
 				changeset = Changeset.find(x.changeset_id)
 				repository = hash[changeset.repository_id]
 				{
-					:issue => x.issue_id,
-					:project => repository[:project].identifier,
-					:repository => repository[:identifier],
-					:revision => changeset.revision,
-					:scmid => changeset.scmid
-				}
+					:issue => {
+						:id => x.issue_id,
+						:project => x.issue.project.identifier
+					},
+					:repository => {
+						:id => repository[:identifier],
+						:project => repository[:project].identifier
+					},
+					:revision => changeset.revision
+				}.merge(changeset.revision == changeset.scmid ? {} : {:scmid => changeset.scmid})
 			end
 		render :json => output
 	end
@@ -44,9 +51,8 @@ class ListRevisionsController < ApplicationController
 			{
 				:project => hash[x.repository_id][:project].identifier,
 				:repository => hash[x.repository_id][:identifier],
-				:revision => x.revision,
-				:scmid => x.scmid
-			}
+				:revision => x.revision
+			}.merge(x.revision == x.scmid ? {} : {:scmid => x.scmid})
 			end
 		render :json => output
 	end
