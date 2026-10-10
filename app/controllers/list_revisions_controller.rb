@@ -53,10 +53,11 @@ class ListRevisionsController < ApplicationController
 	def changesets
 		render :json =>
 			(
-				ListRevisionsChangeset.includes(:project).all.map do |x|
+				ListRevisionsChangeset.includes(:project, :children).all.map do |x|
 					{
 						:project => x.project.identifier,
 						:repository => x.repository.identifier,
+						:children_size => x.children.size,
 						:revision => x.revision
 					}.merge(x.revision == x.scmid ? {} : {:scmid => x.scmid})
 				end
