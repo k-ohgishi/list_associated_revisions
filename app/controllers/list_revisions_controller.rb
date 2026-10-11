@@ -14,7 +14,7 @@ end
 class ListRevisionsController < ApplicationController
 	before_action :require_admin
 	before_action :require_admin_or_api_request
-	accept_api_auth :changeset_issue, :repositories, :changesets
+	accept_api_auth :changeset_issue, :repositories, :changesets, :sql
 
 	def changeset_issue
 		render :json =>
@@ -62,5 +62,14 @@ class ListRevisionsController < ApplicationController
 					}.merge(x.revision == x.scmid ? {} : {:scmid => x.scmid})
 				end
 			)
+	end
+
+	def sql
+		render :json =>
+			{
+				:changeset_issue => ListRevisionsChangesetsIssue.eager_load(:issue_project, :repository_project).to_sql,
+				:repositories => Repository.eager_load(:project).to_sql,
+				:changesets => ListRevisionsChangeset.eager_load(:project, :children).to_sql
+			}
 	end
 end
