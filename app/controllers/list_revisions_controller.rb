@@ -1,11 +1,9 @@
 class ChangesetsIssue < ActiveRecord::Base
 end
 class ListRevisionsChangesetsIssue < ChangesetsIssue
-  belongs_to :issue
   belongs_to :changeset
-  has_one :issue_project, :through => :issue, :source => :project
-  has_one :repository, through: :changeset
-  has_one :repository_project, :through => :repository, :source => :project
+  belongs_to :issue
+  has_one :repository, :through => :changeset
 end
 class ListRevisionsChangeset < Changeset
   has_one :project, through: :repository
@@ -23,11 +21,11 @@ class ListRevisionsController < ApplicationController
 					{
 						:issue => {
 							:id => x.issue_id,
-							:project => x.issue_project.identifier
+							:project => x.issue.project.identifier
 						},
 						:repository => {
-							:id => x.repository.identifier,
-							:project => x.repository_project.identifier
+							:id => x.changeset.repository.identifier,
+							:project => x.changeset.repository.project.identifier
 						},
 						:revision => x.changeset.revision
 					}.merge(x.changeset.revision == x.changeset.scmid ? {} : {:scmid => x.changeset.scmid})
@@ -41,10 +39,10 @@ class ListRevisionsController < ApplicationController
 				get_model(:repositories).sort_by{|x| x.id}.map() do |x|
 					{
 						:id => x.id,
+						:identifier => x.identifier,
 						:project => x.project.identifier,
-						:url => x.url,
 						:type => x.type,
-						:identifier => x.identifier
+						:url => x.url
 					}
 				end
 			)
@@ -55,8 +53,8 @@ class ListRevisionsController < ApplicationController
 			(
 				get_model(:changesets).map() do |x|
 					{
-						:project => x.project.identifier,
 						:repository => x.repository.identifier,
+						:project => x.repository.project.identifier,
 						:children_size => x.children.size,
 						:revision => x.revision
 					}.merge(x.revision == x.scmid ? {} : {:scmid => x.scmid})
@@ -78,11 +76,11 @@ class ListRevisionsController < ApplicationController
 	def get_model(model)
 		case model
 			when :changeset_issue
-				ListRevisionsChangesetsIssue.eager_load(:issue_project, :repository_project)
+				ListRevisionsChangesetsIssue.eager_load(changeset: {repository: :project}, issue: :project)
 			when :repositories
 				Repository.eager_load(:project)
 			when :changesets
-				ListRevisionsChangeset.eager_load(:project, :children)
+				ListRevisionsChangeset.eager_load(:children, {repository: :project})
 		end
 	end
 end
