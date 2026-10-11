@@ -19,7 +19,7 @@ class ListRevisionsController < ApplicationController
 	def changeset_issue
 		render :json =>
 			(
-				ListRevisionsChangesetsIssue.includes(:issue_project, :repository_project).map() do |x|
+				get_model(:changeset_issue).map() do |x|
 					{
 						:issue => {
 							:id => x.issue_id,
@@ -38,7 +38,7 @@ class ListRevisionsController < ApplicationController
 	def repositories
 		render :json =>
 			(
-				Repository.includes(:project).all.sort_by{|x| x.id}.map() do |x|
+				get_model(:repositories).sort_by{|x| x.id}.map() do |x|
 					{
 						:id => x.id,
 						:project => x.project.identifier,
@@ -53,7 +53,7 @@ class ListRevisionsController < ApplicationController
 	def changesets
 		render :json =>
 			(
-				ListRevisionsChangeset.includes(:project, :children).all.map do |x|
+				get_model(:changesets).map() do |x|
 					{
 						:project => x.project.identifier,
 						:repository => x.repository.identifier,
@@ -67,9 +67,22 @@ class ListRevisionsController < ApplicationController
 	def sql
 		render :json =>
 			{
-				:changeset_issue => ListRevisionsChangesetsIssue.eager_load(:issue_project, :repository_project).to_sql,
-				:repositories => Repository.eager_load(:project).to_sql,
-				:changesets => ListRevisionsChangeset.eager_load(:project, :children).to_sql
+				:changeset_issue => get_model(:changeset_issue).to_sql,
+				:repositories => get_model(:repositories).to_sql,
+				:changesets => get_model(:changesets).to_sql
 			}
+	end
+
+	private
+
+	def get_model(model)
+		case model
+			when :changeset_issue
+				ListRevisionsChangesetsIssue.eager_load(:issue_project, :repository_project)
+			when :repositories
+				Repository.eager_load(:project)
+			when :changesets
+				ListRevisionsChangeset.eager_load(:project, :children)
+		end
 	end
 end
