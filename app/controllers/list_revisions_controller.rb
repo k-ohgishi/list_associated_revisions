@@ -8,7 +8,7 @@ class ListRevisionsController < ApplicationController
 			(
 				get_model(:changeset_issue).map() do |x|
 					{
-						:issues => x.issues.map() do |y|
+						:issues => x.issues.sort_by{|y| y.id}.map() do |y|
 							{
 								:id => y.id,
 								:project => y.project.identifier
