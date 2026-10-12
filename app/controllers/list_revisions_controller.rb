@@ -1,14 +1,3 @@
-class ChangesetsIssue < ActiveRecord::Base
-end
-class ListRevisionsChangesetsIssue < ChangesetsIssue
-  belongs_to :changeset
-  belongs_to :issue
-  has_one :repository, :through => :changeset
-end
-class ListRevisionsChangeset < Changeset
-  has_one :project, through: :repository
-end
-
 class ListRevisionsController < ApplicationController
 	before_action :require_admin
 	before_action :require_admin_or_api_request
@@ -19,16 +8,18 @@ class ListRevisionsController < ApplicationController
 			(
 				get_model(:changeset_issue).map() do |x|
 					{
-						:issue => {
-							:id => x.issue_id,
-							:project => x.issue.project.identifier
-						},
+						:issues => x.issues.map() do |y|
+							{
+								:id => y.id,
+								:project => y.project.identifier
+							}
+						end,
 						:repository => {
-							:id => x.changeset.repository.identifier,
-							:project => x.changeset.repository.project.identifier
+							:id => x.repository.identifier,
+							:project => x.repository.project.identifier
 						},
-						:revision => x.changeset.revision
-					}.merge(x.changeset.revision == x.changeset.scmid ? {} : {:scmid => x.changeset.scmid})
+						:revision => x.revision
+					}.merge(x.revision == x.scmid ? {} : {:scmid => x.scmid})
 				end
 			)
 	end
@@ -76,11 +67,11 @@ class ListRevisionsController < ApplicationController
 	def get_model(model)
 		case model
 			when :changeset_issue
-				ListRevisionsChangesetsIssue.eager_load(changeset: {repository: :project}, issue: :project)
+				Changeset.eager_load(issues: :project, repository: :project).where.not(issues: {id: nil})
 			when :repositories
 				Repository.eager_load(:project)
 			when :changesets
-				ListRevisionsChangeset.eager_load(:children, {repository: :project})
+				Changeset.eager_load(:children, {repository: :project})
 		end
 	end
 end
