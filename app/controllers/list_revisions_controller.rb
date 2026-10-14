@@ -3,6 +3,9 @@ class ListRevisionsController < ApplicationController
 	before_action :require_admin_or_api_request
 	accept_api_auth :changeset_issue, :repositories, :changesets, :sql
 
+	def index
+	end
+
 	def changeset_issue
 		respond(:changeset_issue)
 	end
