@@ -1,7 +1,8 @@
-<table>
+<table class="list" id="filters-table">
+ <caption><%= l(:label_menu_list_associated_revisions) %></caption>
  <thead>
   <tr>
-   <th>type</th>
+   <th></th>
    <th>json</th>
    <th>xml</th>
   </tr>
@@ -9,18 +10,18 @@
  <tbody>
   <tr>
    <th>repositories</th>
-   <td><a href="repositories.json">get</a></td>
-   <td><a href="repositories.xml">get</a></td>
+   <td><a href="repositories.json"><%= l(:label_get_list_associated_revisions) %></a></td>
+   <td><a href="repositories.xml"><%= l(:label_get_list_associated_revisions) %></a></td>
   </tr>
   <tr>
    <th>changesets</th>
-   <td><a href="changesets.json">get</a></td>
-   <td><a href="changesets.xml">get</a></td>
+   <td><a href="changesets.json"><%= l(:label_get_list_associated_revisions) %></a></td>
+   <td><a href="changesets.xml"><%= l(:label_get_list_associated_revisions) %></a></td>
   </tr>
   <tr>
    <th>changeset_issue</th>
-   <td><a href="changeset_issue.json">get</a></td>
-   <td><a href="changeset_issue.xml">get</a></td>
+   <td><a href="changeset_issue.json"><%= l(:label_get_list_associated_revisions) %></a></td>
+   <td><a href="changeset_issue.xml"><%= l(:label_get_list_associated_revisions) %></a></td>
   </tr>
  </tbody>
 </table>

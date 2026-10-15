@@ -38,7 +38,7 @@ class ListRevisionsController < ApplicationController
 				render :json => get_data(model)
 			end
 			format.xml do
-				render :xml => get_data(model).to_xml(skip_types: true)
+				render :xml => get_data(model).to_xml(skip_types: true, root: (model == :changeset_issue ? :changesets : model))
 			end
 		end
 	end
